@@ -61,6 +61,7 @@
 )
 ;
 ; FIXME: LSP semantic tokens overriding sql hi groups
+; FIXME: doubled @string.rust overriding sql hi groups
 ; sqlx::query macro (sql)
 (macro_invocation
   macro: (scoped_identifier
@@ -76,6 +77,7 @@
 )
 ;
 ; FIXME: LSP semantic tokens overriding sql hi groups
+; FIXME: doubled @string.rust overriding sql hi groups
 ; sqlx::query_as macro (sql)
 (macro_invocation
   macro: (scoped_identifier
@@ -91,6 +93,7 @@
 )
 ;
 ; FIXME: LSP semantic tokens overriding sql hi groups
+; FIXME: doubled @string.rust overriding sql hi groups
 ; sqlx::query_scalar macro (sql)
 (macro_invocation
   macro: (scoped_identifier
@@ -105,3 +108,39 @@
   (#set! injection.combined)
 )
 
+; diesel::sql_query foo (sql)
+(call_expression
+  function: (scoped_identifier
+    path: (identifier) @_path
+    name: (identifier) @_name)
+  arguments:
+    (arguments
+  	  (_
+  	    (string_content) @injection.content))
+
+  (#eq? @_path "diesel")
+  (#eq? @_name "sql_query")
+  (#set! injection.language "sql")
+  (#set! injection.combined)
+)
+;
+; diesel::dsl::sql foo (sql)
+(call_expression
+  function:
+    (generic_function
+	  function: (scoped_identifier
+	    path: (scoped_identifier
+		  path: (identifier) @_path_1
+		  name: (identifier) @_path_2)
+		name: (identifier) @_name))
+  . arguments: 
+    (arguments
+	  (_ 
+	    (string_content) @injection.content))
+
+  (#eq? @_path_1 "diesel")
+  (#eq? @_path_2 "dsl")
+  (#eq? @_name "sql")
+  (#set! injection.language "sql")
+  (#set! injection.combined)
+)
