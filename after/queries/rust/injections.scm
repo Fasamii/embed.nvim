@@ -1,53 +1,67 @@
 ;; extends
 
-; comment maker in foos (sql)
+; comment marker in declarations and foos (any)
 (
- (block_comment) @_comment
- . (_ (string_content) @injection.content)
- (#lua-match? @_comment "sql")
- (#set! injection.language "sql")
-)
-; comment maker in declarations (sql)
-(
-  (block_comment) @_comment
-  . value: (_ (string_content) @injection.content)
-  (#lua-match? @_comment "sql")
-  (#set! injection.language "sql")
+  (block_comment) @injection.language
+  . (_ (string_content) @injection.content)
+  (#set! injection.combined)
+  (#gsub! @injection.language "^%s*/%*%s*(.-)%s*%*/%s*$" "%1")
 )
 
-; comment marker in foos (lua)
-(
- (block_comment) @_comment
- . (_ (string_content) @injection.content)
- (#lua-match? @_comment "lua")
- (#set! injection.language "lua")
-)
-; comment marker in declarations
-(
-  (block_comment) @_comment
-  . value: (_ (string_content) @injection.content)
-  (#lua-match? @_comment "lua")
-  (#set! injection.language "lua")
-)
-
-; sqlx query (sql)
+; sqlx::query foo (sql)
 (call_expression
   function: (scoped_identifier
-    path: (identifier) @sqlx_path
-    name: (identifier) @sqlx_fn)
+    path: (identifier) @_path
+    name: (identifier) @_name)
   arguments:
     (arguments
-  	  (string_literal
+  	  (_
   	    (string_content) @injection.content))
 
-  (#eq? @sqlx_path "sqlx")
-  (#eq? @sqlx_fn "query")
+  (#eq? @_path "sqlx")
+  (#eq? @_name "query")
   (#set! injection.language "sql")
   (#set! injection.combined)
 )
+;
+; sqlx::query_as foo (sql)
+(call_expression
+  function: (generic_function
+    function:(scoped_identifier
+	  path: (identifier) @_path
+	  name: (identifier) @_name
+	))
+  . arguments: 
+    (arguments 
+	  (_ 
+	    (string_content) @injection.content))
 
+  (#eq? @_path "sqlx")
+  (#eq? @_name "query_as")
+  (#set! injection.language "sql")
+  (#set! injection.combined)
+)
+;
+; sqlx::query_scalar foo (sql)
+(call_expression
+  function: (generic_function
+    function:(scoped_identifier
+	  path: (identifier) @_path
+	  name: (identifier) @_name
+	))
+  . arguments: 
+    (arguments 
+	  (_ 
+	    (string_content) @injection.content))
+
+  (#eq? @_path "sqlx")
+  (#eq? @_name "query_scalar")
+  (#set! injection.language "sql")
+  (#set! injection.combined)
+)
+;
 ; FIXME: LSP semantic tokens overriding sql hi groups
-; sqlx query macro (sql)
+; sqlx::query macro (sql)
 (macro_invocation
   macro: (scoped_identifier
 	path: (identifier) @_path
@@ -57,6 +71,36 @@
 	  (string_content) @injection.content))
   (#eq? @_path "sqlx")
   (#eq? @_macro "query")
+  (#set! injection.language "sql")
+  (#set! injection.combined)
+)
+;
+; FIXME: LSP semantic tokens overriding sql hi groups
+; sqlx::query_as macro (sql)
+(macro_invocation
+  macro: (scoped_identifier
+	path: (identifier) @_path
+    name: (identifier) @_macro)
+  (token_tree
+	(_
+	  (string_content) @injection.content))
+  (#eq? @_path "sqlx")
+  (#eq? @_macro "query_as")
+  (#set! injection.language "sql")
+  (#set! injection.combined)
+)
+;
+; FIXME: LSP semantic tokens overriding sql hi groups
+; sqlx::query_scalar macro (sql)
+(macro_invocation
+  macro: (scoped_identifier
+	path: (identifier) @_path
+    name: (identifier) @_macro)
+  (token_tree
+	(_
+	  (string_content) @injection.content))
+  (#eq? @_path "sqlx")
+  (#eq? @_macro "query_scalar")
   (#set! injection.language "sql")
   (#set! injection.combined)
 )
