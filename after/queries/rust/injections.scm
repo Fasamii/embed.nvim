@@ -7,7 +7,7 @@
   (#set! injection.combined)
   (#gsub! @injection.language "^%s*/%*%s*(.-)%s*%*/%s*$" "%1")
 )
-
+;
 ; sqlx::query foo (sql)
 (call_expression
   function: (scoped_identifier
@@ -31,7 +31,7 @@
 	  path: (identifier) @_path
 	  name: (identifier) @_name
 	))
-  . arguments: 
+  arguments: 
     (arguments 
 	  (_ 
 	    (string_content) @injection.content))
@@ -49,7 +49,7 @@
 	  path: (identifier) @_path
 	  name: (identifier) @_name
 	))
-  . arguments: 
+  arguments: 
     (arguments 
 	  (_ 
 	    (string_content) @injection.content))
@@ -133,7 +133,7 @@
 		  path: (identifier) @_path_1
 		  name: (identifier) @_path_2)
 		name: (identifier) @_name))
-  . arguments: 
+  arguments: 
     (arguments
 	  (_ 
 	    (string_content) @injection.content))
@@ -141,6 +141,43 @@
   (#eq? @_path_1 "diesel")
   (#eq? @_path_2 "dsl")
   (#eq? @_name "sql")
+  (#set! injection.language "sql")
+  (#set! injection.combined)
+)
+
+; sea_orm::Query::from_raw_sql foo (sql)
+(call_expression
+  function: (scoped_identifier
+	path: (scoped_identifier
+	  path: (identifier) @_path_1
+	  name: (identifier) @_path_2)
+	name: (identifier) @_name)
+  arguments: 
+    (arguments
+	  (_
+	    (string_content) @injection.content))
+
+  (#eq? @_path_1 "sea_orm")
+  (#eq? @_path_2 "Query")
+  (#eq? @_name "from_raw_sql")
+  (#set! injection.language "sql")
+  (#set! injection.combined)
+)
+;
+; sea_orm::Statement::from_string foo (sql)
+(call_expression
+  function: (scoped_identifier
+    path: (scoped_identifier
+	  path: (identifier) @_path_1
+	  name: (identifier) @_path_2)
+	name: (identifier) @_name)
+  arguments: (arguments
+	(_
+	  (string_content) @injection.content))
+
+  (#eq? @_path_1 "sea_orm")
+  (#eq? @_path_2 "Statement")
+  (#eq? @_name "from_string")
   (#set! injection.language "sql")
   (#set! injection.combined)
 )
