@@ -259,3 +259,27 @@
   (#set! injection.language "lua")
   (#set! injection.combined)
 )
+
+; hlua::Lua::new().execute() foo (lua)
+(call_expression
+  function: (generic_function
+	function: (field_expression
+	  value: (call_expression
+		function: (scoped_identifier
+		  path: (scoped_identifier
+			path: (identifier) @_path_1
+			name: (identifier) @_path_2)
+		  name: (identifier) @_name_1))
+	  field: (field_identifier) @_name_2))
+  arguments: (arguments
+	(_
+	  (string_content) @injection.content))
+
+
+  (#eq? @_path_1 "hlua")
+  (#eq? @_path_2 "Lua")
+  (#eq? @_name_1 "new")
+  (#eq? @_name_2 "execute")
+  (#set! injection.language "lua")
+  (#set! injection.combined)
+)
