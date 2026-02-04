@@ -7,7 +7,21 @@
   (#set! injection.combined)
   (#gsub! @injection.language "^%s*/%*%s*(.-)%s*%*/%s*$" "%1")
 )
-;
+
+; sql with common function names (sql)
+(call_expression
+  function: (field_expression
+	field: (field_identifier) @_name)
+  arguments: (arguments
+	(_
+	  (string_content) @injection.content))
+
+  (#any-of? @_name "execute" "execute_batch" "query" "query_one" "query_opt" "query_optional" "query_as" "query_row" "fetch" "fetch_one" "fetch_all" "fetch_opt" "fetch_optional" "prepare" "prepare_cached")
+  (#match? @injection.content "^\\s*([Ss][Ee][Ll][Ee][Cc][Tt]|[Ii][Nn][Ss][Ee][Rr][Tt]|[Uu][Pp][Dd][Aa][Tt][Ee]|[Dd][Ee][Ll][Ee][Tt][Ee]|[Ww][Ii][Tt][Hh]|[Cc][Re][Ee][Aa][Tt][Ee]|[Dd][Rr][Oo][Pp]|[Aa][Ll][Tt][Ee][Rr]|[Tt][Rr][Uu][Nn][Cc][Aa][Tt][Ee]|[Rr][Ee][Pp][Ll][Aa][Cc][Ee])")
+  (#set! injection.language "sql")
+  (#set! injection.combined)
+)
+
 ; sqlx::query() foo (sql)
 (call_expression
   function: (scoped_identifier
