@@ -8,20 +8,32 @@
   (#gsub! @injection.language "^%s*/%*%s*(.-)%s*%*/%s*$" "%1")
 )
 
-; sql with common function names (sql)
+; common function names with sql keyword (sql)
 (call_expression
-  function: (field_expression
-	field: (field_identifier) @_name)
+  function: [
+    (identifier) @_name
+    (field_expression
+      field: (field_identifier) @_name)
+    (scoped_identifier
+      name: (identifier) @_name)
+    (generic_function
+      function: [
+        (scoped_identifier
+          name: (identifier) @_name)
+        (field_expression
+          field: (field_identifier) @_name)
+      ])
+  ]
   arguments: (arguments
-	(_
-	  (string_content) @injection.content))
-
-  (#any-of? @_name "execute" "execute_batch" "query" "query_one" "query_opt" "query_optional" "query_as" "query_row" "fetch" "fetch_one" "fetch_all" "fetch_opt" "fetch_optional" "prepare" "prepare_cached")
+    (_
+      (string_content) @injection.content))
+  (#any-of? @_name "execute" "execute_raw" "execute_batch" "batch_execute" "query" "query_typed" "query_scalar" "query_typed_raw" "query_one" "query_one_scalar" "query_opt" "query_optional" "query_opt_scalar" "query_raw" "query_as" "query_row" "simple_query" "simple_query_raw" "fetch" "fetch_one" "fetch_all" "fetch_opt" "fetch_optional" "prepare" "prepare_cached" "prepare_typed") 
   (#match? @injection.content "^\\s*([Ss][Ee][Ll][Ee][Cc][Tt]|[Ii][Nn][Ss][Ee][Rr][Tt]|[Uu][Pp][Dd][Aa][Tt][Ee]|[Dd][Ee][Ll][Ee][Tt][Ee]|[Ww][Ii][Tt][Hh]|[Cc][Re][Ee][Aa][Tt][Ee]|[Dd][Rr][Oo][Pp]|[Aa][Ll][Tt][Ee][Rr]|[Tt][Rr][Uu][Nn][Cc][Aa][Tt][Ee]|[Rr][Ee][Pp][Ll][Aa][Cc][Ee])")
   (#set! injection.language "sql")
   (#set! injection.combined)
 )
 
+; TODO: Cover the rest of sqlx functions
 ; sqlx::query() foo (sql)
 (call_expression
   function: (scoped_identifier
@@ -31,7 +43,6 @@
     (arguments
   	  (_
   	    (string_content) @injection.content))
-
   (#eq? @_path "sqlx")
   (#eq? @_name "query")
   (#set! injection.language "sql")
@@ -42,14 +53,13 @@
 (call_expression
   function: (generic_function
     function:(scoped_identifier
-	  path: (identifier) @_path
-	  name: (identifier) @_name
-	))
+      path: (identifier) @_path
+      name: (identifier) @_name
+    ))
   arguments: 
     (arguments 
-	  (_ 
-	    (string_content) @injection.content))
-
+      (_ 
+        (string_content) @injection.content))
   (#eq? @_path "sqlx")
   (#eq? @_name "query_as")
   (#set! injection.language "sql")
@@ -60,14 +70,13 @@
 (call_expression
   function: (generic_function
     function:(scoped_identifier
-	  path: (identifier) @_path
-	  name: (identifier) @_name
-	))
+      path: (identifier) @_path
+      name: (identifier) @_name
+    ))
   arguments: 
     (arguments 
-	  (_ 
-	    (string_content) @injection.content))
-
+      (_ 
+        (string_content) @injection.content))
   (#eq? @_path "sqlx")
   (#eq? @_name "query_scalar")
   (#set! injection.language "sql")
@@ -79,11 +88,11 @@
 ; sqlx::query!() macro (sql)
 (macro_invocation
   macro: (scoped_identifier
-	path: (identifier) @_path
+   	path: (identifier) @_path
     name: (identifier) @_macro)
   (token_tree
-	(_
-	  (string_content) @injection.content))
+  	(_
+  	  (string_content) @injection.content))
   (#eq? @_path "sqlx")
   (#eq? @_macro "query")
   (#set! injection.language "sql")
@@ -95,11 +104,11 @@
 ; sqlx::query_as!() macro (sql)
 (macro_invocation
   macro: (scoped_identifier
-	path: (identifier) @_path
+  	path: (identifier) @_path
     name: (identifier) @_macro)
   (token_tree
-	(_
-	  (string_content) @injection.content))
+  	(_
+  	  (string_content) @injection.content))
   (#eq? @_path "sqlx")
   (#eq? @_macro "query_as")
   (#set! injection.language "sql")
@@ -111,17 +120,18 @@
 ; sqlx::query_scalar!() macro (sql)
 (macro_invocation
   macro: (scoped_identifier
-	path: (identifier) @_path
+  	path: (identifier) @_path
     name: (identifier) @_macro)
   (token_tree
-	(_
-	  (string_content) @injection.content))
+  	(_
+      (string_content) @injection.content))
   (#eq? @_path "sqlx")
   (#eq? @_macro "query_scalar")
   (#set! injection.language "sql")
   (#set! injection.combined)
 )
 
+; TODO: Cover the rest of diesel functions
 ; diesel::sql_query() foo (sql)
 (call_expression
   function: (scoped_identifier
@@ -131,7 +141,6 @@
     (arguments
   	  (_
   	    (string_content) @injection.content))
-
   (#eq? @_path "diesel")
   (#eq? @_name "sql_query")
   (#set! injection.language "sql")
@@ -142,16 +151,15 @@
 (call_expression
   function:
     (generic_function
-	  function: (scoped_identifier
-	    path: (scoped_identifier
-		  path: (identifier) @_path_1
-		  name: (identifier) @_path_2)
-		name: (identifier) @_name))
+  	  function: (scoped_identifier
+  	    path: (scoped_identifier
+          path: (identifier) @_path_1
+  	      name: (identifier) @_path_2)
+        name: (identifier) @_name))
   arguments: 
     (arguments
-	  (_ 
-	    (string_content) @injection.content))
-
+      (_ 
+        (string_content) @injection.content))
   (#eq? @_path_1 "diesel")
   (#eq? @_path_2 "dsl")
   (#eq? @_name "sql")
@@ -159,18 +167,18 @@
   (#set! injection.combined)
 )
 
+; TODO: Cover the rest of sea_orm functions
 ; sea_orm::Query::from_raw_sql() foo (sql)
 (call_expression
   function: (scoped_identifier
-	path: (scoped_identifier
-	  path: (identifier) @_path_1
-	  name: (identifier) @_path_2)
-	name: (identifier) @_name)
+    path: (scoped_identifier
+      path: (identifier) @_path_1
+      name: (identifier) @_path_2)
+    name: (identifier) @_name)
   arguments: 
     (arguments
-	  (_
-	    (string_content) @injection.content))
-
+      (_
+        (string_content) @injection.content))
   (#eq? @_path_1 "sea_orm")
   (#eq? @_path_2 "Query")
   (#eq? @_name "from_raw_sql")
@@ -182,13 +190,12 @@
 (call_expression
   function: (scoped_identifier
     path: (scoped_identifier
-	  path: (identifier) @_path_1
-	  name: (identifier) @_path_2)
-	name: (identifier) @_name)
+  	  path: (identifier) @_path_1
+  	  name: (identifier) @_path_2)
+  	name: (identifier) @_name)
   arguments: (arguments
-	(_
-	  (string_content) @injection.content))
-
+  	(_
+  	  (string_content) @injection.content))
   (#eq? @_path_1 "sea_orm")
   (#eq? @_path_2 "Statement")
   (#eq? @_name "from_string")
@@ -196,17 +203,19 @@
   (#set! injection.combined)
 )
 
+
+
+; TODO: Cover the rest of tokio_postgres functions
 ; tokio_postgres::Client::query() foo (sql)
 (call_expression
   function: (scoped_identifier
-	path: (scoped_identifier
-	  path: (identifier) @_path_1
-	  name: (identifier) @_path_2)
-	name: (identifier) @_name)
+  	path: (scoped_identifier
+  	  path: (identifier) @_path_1
+  	  name: (identifier) @_path_2)
+  	name: (identifier) @_name)
   arguments: (arguments
-	(_
-	  (string_content) @injection.content))
-
+  	(_
+  	  (string_content) @injection.content))
   (#eq? @_path_1 "tokio_postgres")
   (#eq? @_path_2 "Client")
   (#eq? @_name "query")
@@ -217,18 +226,17 @@
 ; mlua::Lua::new().load() foo (lua)
 (call_expression
   function: (field_expression
-	value: (call_expression
-	  function: (scoped_identifier
-		path: (scoped_identifier
-		  path: (identifier) @_path_1
-		  name: (identifier) @_path_2)
-		name: (identifier) @_name_1))
-	field: (field_identifier) @_name_2)
+  	value: (call_expression
+  	  function: (scoped_identifier
+  	  	path: (scoped_identifier
+  	  	  path: (identifier) @_path_1
+  	  	  name: (identifier) @_path_2)
+  	  	name: (identifier) @_name_1))
+  	field: (field_identifier) @_name_2)
   arguments:
     (arguments
-	  (_
-		(string_content) @injection.content))
-
+  	  (_
+  		(string_content) @injection.content))
   (#eq? @_path_1 "mlua")
   (#eq? @_path_2 "Lua")
   (#eq? @_name_1 "new")
@@ -240,31 +248,29 @@
 ; rlua::Lua::new().context(|x| x.load()) foo (lua)
 (call_expression
   function: (field_expression
-	value: (call_expression
-	  function: (scoped_identifier
-		path: (scoped_identifier
-		  path: (identifier) @_path_1
-		  name: (identifier) @_path_2)
-		name: (identifier) @_name_1))
+  	value: (call_expression
+  	  function: (scoped_identifier
+  	  	path: (scoped_identifier
+  	  	  path: (identifier) @_path_1
+  	  	  name: (identifier) @_path_2)
+  	  	name: (identifier) @_name_1))
     field: (field_identifier) @_name_2)
   arguments: (arguments
     (closure_expression
-	  parameters: (closure_parameters (identifier) @_val_origin)
-	  body: (block
-		(expression_statement
-		  (call_expression
-			function: (field_expression
-			  value: (call_expression
-				function: (field_expression
-				  value:(call_expression 
-					function: (field_expression
-					  value: (identifier) @_val_match
-					  field: (field_identifier) @_name_3)
-					arguments: (arguments
-					  (_
-						(string_content) @injection.content)))))))))))
-
-
+  	  parameters: (closure_parameters (identifier) @_val_origin)
+  	  body: (block
+  	  	(expression_statement
+  	  	  (call_expression
+  	  	  	function: (field_expression
+  	  	  	  value: (call_expression
+  	  	  	  	function: (field_expression
+  	  	  	  	  value:(call_expression 
+  	  	  	  	  	function: (field_expression
+  	  	  	  	  	  value: (identifier) @_val_match
+  	  	  	  	  	  field: (field_identifier) @_name_3)
+  	  	  	  	  	arguments: (arguments
+  	  	  	  	  	  (_
+  	  	  	  	  	    (string_content) @injection.content)))))))))))
   (#eq? @_path_1 "rlua")
   (#eq? @_path_2 "Lua")
   (#eq? @_name_1 "new")
@@ -277,19 +283,17 @@
 ; hlua::Lua::new().execute() foo (lua)
 (call_expression
   function: (generic_function
-	function: (field_expression
-	  value: (call_expression
-		function: (scoped_identifier
-		  path: (scoped_identifier
-			path: (identifier) @_path_1
-			name: (identifier) @_path_2)
-		  name: (identifier) @_name_1))
-	  field: (field_identifier) @_name_2))
+  	function: (field_expression
+  	  value: (call_expression
+  	  	function: (scoped_identifier
+  	  	  path: (scoped_identifier
+  	  	  	path: (identifier) @_path_1
+  	  	  	name: (identifier) @_path_2)
+  	  	  name: (identifier) @_name_1))
+  	  field: (field_identifier) @_name_2))
   arguments: (arguments
-	(_
-	  (string_content) @injection.content))
-
-
+  	(_
+      (string_content) @injection.content))
   (#eq? @_path_1 "hlua")
   (#eq? @_path_2 "Lua")
   (#eq? @_name_1 "new")

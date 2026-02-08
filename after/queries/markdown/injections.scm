@@ -1,3 +1,8 @@
+; extends
+
+; (((inline) @_inline (#match? @_inline "^\(import\|export\)")) @injection.content
+; 	(#set! injection.language "tsx"))
+
 ; ;; Generic code block - auto-detect language
 ; ((fenced_code_block
 ;   (info_string) @injection.language
